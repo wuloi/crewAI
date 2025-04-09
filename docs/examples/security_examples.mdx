@@ -1,0 +1,60 @@
+## 安全指纹验证示例
+
+### 自动生成指纹
+```python
+# 创建带有自动生成指纹的智能体
+researcher = Agent(
+    role="研究员",
+    goal="进行深度研究",
+    backstory="资深行业分析师"
+)
+
+# 验证指纹自动生成
+assert researcher.fingerprint is not None
+print(f"智能体指纹: {researcher.fingerprint.uuid_str}")
+```
+
+### 手动配置安全策略
+```python
+from crewai.security import SecurityConfig
+
+# 创建自定义安全配置
+security_config = SecurityConfig(
+    enabled=True,
+    fingerprint_seed="项目专属密钥123"
+)
+
+# 应用安全配置到任务
+research_task = Task(
+    description="市场趋势分析",
+    expected_output="详细研究报告",
+    security_config=security_config
+)
+
+# 验证任务指纹
+assert research_task.fingerprint is not None
+print(f"任务指纹: {research_task.fingerprint.uuid_str}")
+```
+
+### 指纹唯一性验证
+```python
+# 创建多个任务并验证指纹唯一性
+tasks = [
+    Task(description=f"数据分析任务{i}", expected_output="处理结果")
+    for i in range(3)
+]
+
+fingerprints = {task.fingerprint.uuid_str for task in tasks}
+assert len(fingerprints) == 3, "所有任务应具有唯一指纹"
+```
+
+### 不良实践示例
+```python
+# 错误示例：硬编码指纹值
+security_config = SecurityConfig(
+    fingerprint=Fingerprint(value="静态指纹")
+)
+
+# 会导致安全验证失败
+# 应始终使用自动生成或基于种子的动态生成
+```

@@ -1,0 +1,84 @@
+## 多智能体协作示例
+
+### 基础任务编排
+```python
+# 创建研究团队
+researcher = Agent(
+    role="市场分析师",
+    goal="收集行业数据",
+    backstory="资深数据分析专家"
+)
+
+writer = Agent(
+    role="内容创作",
+    goal="生成分析报告",
+    backstory专业文案作家"
+)
+
+# 定义协同任务
+research_task = Task(
+    description="收集2023年AI行业趋势数据",
+    expected_output="结构化数据表格",
+    agent=researcher
+)
+
+writing_task = Task(
+    description="生成年度趋势报告",
+    expected_output="10页PDF格式报告",
+    agent=writer,
+    context=[research_task]
+)
+
+# 创建执行团队
+team = Crew(
+    agents=[researcher, writer],
+    tasks=[research_task, writing_task]
+)
+
+# 执行工作流
+result = team.kickoff()
+```
+
+### 动态任务分配
+```python
+# 创建管理者智能体
+manager = Agent(
+    role="项目总监",
+    goal="优化任务分配",
+    backstory="资深项目管理专家"
+)
+
+# 根据运行时条件动态创建任务
+def dynamic_task_creation():
+    if market_condition == "volatile":
+        return Task(
+            description="执行风险评估",
+            expected_output="风险评估报告",
+            agent=manager
+        )
+    else:
+        return Task(
+            description="推进市场扩展",
+            expected_output="扩展计划",
+            agent=manager
+        )
+```
+
+### 智能体通信模式
+```python
+# 设置消息总线
+from crewai import MessageBus
+
+bus = MessageBus()
+
+# 智能体注册消息处理器
+@researcher.on_message("data_ready")
+def handle_data(message):
+    if message.type == "analysis_complete":
+        start_writing_task(message.data)
+
+# 任务间事件触发
+research_task.on_complete(lambda: 
+    bus.publish("data_ready", {"status": "completed"})
+)
+```
